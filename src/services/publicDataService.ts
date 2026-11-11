@@ -1,5 +1,3 @@
-import publicData from '../data/public.json'
-
 export interface Hub {
   id: string
   name: string
@@ -83,16 +81,52 @@ interface PublicDataset {
   matches: Match[]
 }
 
-const dataset = publicData as PublicDataset
+const PUBLIC_DATA_URL = 'https://data.timothy-apolinario.com/public.json'
+
+async function getPublicDataset(): Promise<PublicDataset> {
+  let response: Response
+  try {
+    response = await fetch(PUBLIC_DATA_URL, { cache: 'no-store' })
+  } catch (cause) {
+    const detail = cause instanceof Error ? ` ${cause.message}` : ''
+    throw new Error(
+      `Could not fetch public data from ${PUBLIC_DATA_URL}.${detail} Check that the host allows requests from this site with CORS.`,
+    )
+  }
+
+  if (!response.ok) {
+    throw new Error(
+      `Failed to load public data (${response.status} ${response.statusText}).`,
+    )
+  }
+
+  const data: unknown = await response.json()
+  if (
+    typeof data !== 'object' ||
+    data === null ||
+    !('hubs' in data) ||
+    !Array.isArray(data.hubs) ||
+    !('players' in data) ||
+    !Array.isArray(data.players) ||
+    !('matches' in data) ||
+    !Array.isArray(data.matches)
+  ) {
+    throw new Error(`Public data from ${PUBLIC_DATA_URL} has an invalid format.`)
+  }
+
+  return data as PublicDataset
+}
 
 export const hubService: HubService = {
   async getHubs() {
+    const dataset = await getPublicDataset()
     return dataset.hubs.filter((hub) => hub.isActive)
   },
 }
 
 export const leaderboardService: LeaderboardService = {
   async getLeaderboard(hubId) {
+    const dataset = await getPublicDataset()
     return dataset.players
       .filter((player) => player.hubId === hubId && player.isActive)
       .sort(
@@ -108,6 +142,7 @@ export const leaderboardService: LeaderboardService = {
 
 export const matchService: MatchService = {
   async getMatches(filters = {}) {
+    const dataset = await getPublicDataset()
     return dataset.matches
       .filter(
         (match) =>
@@ -124,6 +159,7 @@ export const matchService: MatchService = {
       )
   },
   async getMatchById(matchId) {
+    const dataset = await getPublicDataset()
     return (
       dataset.matches.find(
         (match) =>

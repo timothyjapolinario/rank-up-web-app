@@ -1,3 +1,9 @@
 {
-  "target": "react"
+  "target": "react",
+  "TEST": [
+    {
+      "AllowedOrigins": ["rank-up.timothy-apolinario.com"],
+      "AllowedMethods": ["GET"]
+    }
+  ]
 }
