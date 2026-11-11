@@ -11,6 +11,7 @@ export function getRouter() {
   const router = createTanStackRouter({
     routeTree,
     context,
+    basepath: import.meta.env.BASE_URL.replace(/\/$/, '') || '/',
     scrollRestoration: true,
     defaultPreload: 'intent',
     defaultPreloadStaleTime: 0,

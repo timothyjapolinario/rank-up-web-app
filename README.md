@@ -30,3 +30,9 @@ The async `HubService`, `LeaderboardService`, and `MatchService` contracts are d
 ```bash
 npm run build
 ```
+
+## Deploy to GitHub Pages
+
+The `Deploy to GitHub Pages` workflow builds and publishes this public website when changes are pushed to `master`. It does not deploy the separate admin app. In the repository settings, set **Pages → Build and deployment → Source** to **GitHub Actions**.
+
+The workflow builds for the project site at `https://timothyjapolinario.github.io/rank-up-web-app/` and statically prerenders the routes, including match details from `src/data/public.json`.
