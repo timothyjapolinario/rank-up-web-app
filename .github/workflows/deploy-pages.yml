@@ -37,7 +37,7 @@ jobs:
       - name: Build website
         run: pnpm build
         env:
-          VITE_BASE_PATH: /rank-up-web-app/
+          VITE_BASE_PATH: /
 
       - name: Add GitHub Pages fallback
         run: cp .output/public/index.html .output/public/404.html
