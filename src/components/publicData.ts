@@ -3,19 +3,35 @@ import { hydrateSelectedHubStore, useSelectedHubStore } from '../stores/selected
 import { hubService } from '../services/publicDataService'
 import type { Hub } from '../services/publicDataService'
 
+let cachedHubs: Hub[] | undefined
+let hubsRequest: Promise<Hub[]> | undefined
+
+function loadPublicHubs() {
+  if (cachedHubs !== undefined) return Promise.resolve(cachedHubs)
+  if (!hubsRequest) {
+    hubsRequest = hydrateSelectedHubStore()
+      .then(() => hubService.getHubs())
+      .then((result) => {
+        cachedHubs = result
+        return result
+      })
+      .finally(() => { hubsRequest = undefined })
+  }
+  return hubsRequest
+}
+
 export function usePublicHubs() {
-  const [hubs, setHubs] = useState<Hub[]>([])
+  const [hubs, setHubs] = useState<Hub[]>(() => cachedHubs ?? [])
   const hubId = useSelectedHubStore((state) => state.hubId)
   const setHubId = useSelectedHubStore((state) => state.setHubId)
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(() => cachedHubs === undefined)
   const [error, setError] = useState('')
 
   useEffect(() => {
     let active = true
-    async function loadHubs() {
+    async function load() {
       try {
-        await hydrateSelectedHubStore()
-        const result = await hubService.getHubs()
+        const result = await loadPublicHubs()
         if (!active) return
         setHubs(result)
         const selectedHubId = useSelectedHubStore.getState().hubId
@@ -27,7 +43,7 @@ export function usePublicHubs() {
       }
     }
 
-    void loadHubs()
+    void load()
     return () => { active = false }
   }, [setHubId])
 
