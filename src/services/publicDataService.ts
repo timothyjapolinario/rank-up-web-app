@@ -1,5 +1,3 @@
-import developmentDataset from '../../test-data/public.json'
-
 export interface Hub {
   id: string
   name: string
@@ -104,12 +102,9 @@ function validatePublicDataset(data: unknown): PublicDataset {
 }
 
 async function getPublicDataset(): Promise<PublicDataset> {
-  if (import.meta.env.DEV) {
-    return validatePublicDataset(developmentDataset)
-  }
-
+  const dataUrl = import.meta.env.DEV ? '/test-data/public.json' : PUBLIC_DATA_URL
   try {
-    const response = await fetch(PUBLIC_DATA_URL, { cache: 'no-store' })
+    const response = await fetch(dataUrl, { cache: 'no-store' })
     if (!response.ok) {
       throw new Error(`Public data request failed with status ${response.status}.`)
     }
