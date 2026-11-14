@@ -1,3 +1,5 @@
+import developmentDataset from '../../test-data/public.json'
+
 export interface Hub {
   id: string
   name: string
@@ -82,25 +84,9 @@ interface PublicDataset {
 }
 
 const PUBLIC_DATA_URL = 'https://data.timothy-apolinario.com/public.json'
+const PUBLIC_DATA_ERROR = 'Public data unavailable to load.'
 
-async function getPublicDataset(): Promise<PublicDataset> {
-  let response: Response
-  try {
-    response = await fetch(PUBLIC_DATA_URL, { cache: 'no-store' })
-  } catch (cause) {
-    const detail = cause instanceof Error ? ` ${cause.message}` : ''
-    throw new Error(
-      `Could not fetch public data from ${PUBLIC_DATA_URL}.${detail} Check that the host allows requests from this site with CORS.`,
-    )
-  }
-
-  if (!response.ok) {
-    throw new Error(
-      `Failed to load public data (${response.status} ${response.statusText}).`,
-    )
-  }
-
-  const data: unknown = await response.json()
+function validatePublicDataset(data: unknown): PublicDataset {
   if (
     typeof data !== 'object' ||
     data === null ||
@@ -111,10 +97,29 @@ async function getPublicDataset(): Promise<PublicDataset> {
     !('matches' in data) ||
     !Array.isArray(data.matches)
   ) {
-    throw new Error(`Public data from ${PUBLIC_DATA_URL} has an invalid format.`)
+    throw new Error(PUBLIC_DATA_ERROR)
   }
 
   return data as PublicDataset
+}
+
+async function getPublicDataset(): Promise<PublicDataset> {
+  if (import.meta.env.DEV) {
+    return validatePublicDataset(developmentDataset)
+  }
+
+  try {
+    const response = await fetch(PUBLIC_DATA_URL, { cache: 'no-store' })
+    if (!response.ok) {
+      throw new Error(`Public data request failed with status ${response.status}.`)
+    }
+
+    const data: unknown = await response.json()
+    return validatePublicDataset(data)
+  } catch (cause) {
+    console.error('Failed to load public data.', cause)
+    throw new Error(PUBLIC_DATA_ERROR)
+  }
 }
 
 export const hubService: HubService = {

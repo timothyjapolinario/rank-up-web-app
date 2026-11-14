@@ -1,29 +1,35 @@
 import { useEffect, useState } from 'react'
+import { hydrateSelectedHubStore, useSelectedHubStore } from '../stores/selectedHubStore'
 import { hubService } from '../services/publicDataService'
 import type { Hub } from '../services/publicDataService'
 
 export function usePublicHubs() {
   const [hubs, setHubs] = useState<Hub[]>([])
-  const [hubId, setHubId] = useState('')
+  const hubId = useSelectedHubStore((state) => state.hubId)
+  const setHubId = useSelectedHubStore((state) => state.setHubId)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
   useEffect(() => {
     let active = true
-    hubService.getHubs()
-      .then((result) => {
+    async function loadHubs() {
+      try {
+        await hydrateSelectedHubStore()
+        const result = await hubService.getHubs()
         if (!active) return
         setHubs(result)
-        setHubId(result[0]?.id ?? '')
-      })
-      .catch((cause: unknown) => {
+        const selectedHubId = useSelectedHubStore.getState().hubId
+        setHubId(result.some((hub) => hub.id === selectedHubId) ? selectedHubId : result[0]?.id ?? '')
+      } catch (cause: unknown) {
         if (active) setError(errorMessage(cause))
-      })
-      .finally(() => {
+      } finally {
         if (active) setLoading(false)
-      })
+      }
+    }
+
+    void loadHubs()
     return () => { active = false }
-  }, [])
+  }, [setHubId])
 
   return { hubs, hubId, setHubId, loading, error }
 }
