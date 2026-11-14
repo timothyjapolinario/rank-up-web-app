@@ -1553,15 +1553,9 @@ button:disabled {
 }
 
 .public-brand-mark {
-  display: grid;
   width: 35px;
   height: 35px;
-  place-items: center;
-  border-radius: 11px 11px 11px 4px;
-  background: #c4f36b;
-  color: #1c2711;
-  font-size: 20px;
-  letter-spacing: -0.1em;
+  object-fit: contain;
 }
 
 .public-nav {
@@ -2335,7 +2329,6 @@ button:disabled {
   .public-brand-mark {
     width: 31px;
     height: 31px;
-    font-size: 18px;
   }
 
   .public-nav {

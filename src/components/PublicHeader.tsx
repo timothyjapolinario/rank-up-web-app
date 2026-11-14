@@ -14,7 +14,11 @@ export default function PublicHeader({
     <header className="public-header">
       <div className="public-header-inner">
         <Link to="/" className="public-brand" aria-label="RankUp leaderboard">
-          <span className="public-brand-mark">R</span>
+          <img
+            className="public-brand-mark"
+            src="/Bright%20Lime%20RankUp%20R-and-Arrow%20Icon.png"
+            alt=""
+          />
           <span>
             rank<span>up</span>
             <small>COMPETITIVE RANKINGS</small>

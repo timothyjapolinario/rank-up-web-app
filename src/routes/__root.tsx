@@ -38,6 +38,11 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
         rel: 'stylesheet',
         href: appCss,
       },
+      {
+        rel: 'icon',
+        type: 'image/png',
+        href: '/Bright%20Lime%20RankUp%20R-and-Arrow%20Icon.png',
+      },
     ],
   }),
   shellComponent: RootDocument,
