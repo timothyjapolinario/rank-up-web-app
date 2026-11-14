@@ -7,6 +7,17 @@ import type { LeaderboardEntry } from '../services/publicDataService'
 
 export const Route = createFileRoute('/')({ component: LeaderboardPage })
 
+function rankPlayers(players: LeaderboardEntry[]) {
+  let previousMMR: number | undefined
+  let rank = 0
+
+  return players.map((player, index) => {
+    if (index === 0 || player.currentMMR !== previousMMR) rank = index + 1
+    previousMMR = player.currentMMR
+    return { player, rank }
+  })
+}
+
 function LeaderboardPage() {
   const { hubs, hubId, setHubId, loading: hubsLoading, error: hubsError } = usePublicHubs()
   const [players, setPlayers] = useState<LeaderboardEntry[]>([])
@@ -27,6 +38,7 @@ function LeaderboardPage() {
 
   const selectedHub = hubs.find((hub) => hub.id === hubId)
   const pageError = hubsError || error
+  const rankedPlayers = rankPlayers(players)
 
   return (
     <div className="public-app">
@@ -66,14 +78,14 @@ function LeaderboardPage() {
                   <tr><th scope="col">RANK</th><th scope="col">PLAYER</th><th scope="col">MMR</th><th scope="col">W</th><th scope="col">L</th><th scope="col">WIN RATE</th></tr>
                 </thead>
                 <tbody>
-                  {players.map((player, index) => (
-                    <tr key={player.playerId} className={index === 0 ? 'leaderboard-top' : ''}>
-                      <td><span className={`leaderboard-rank ${index < 3 ? `rank-${index + 1}` : ''}`}>{String(index + 1).padStart(2, '0')}</span></td>
+                  {rankedPlayers.map(({ player, rank }, index) => (
+                    <tr key={player.playerId} className={rank === 1 ? 'leaderboard-top' : ''}>
+                      <td><span className={`leaderboard-rank ${rank <= 3 ? `rank-${rank}` : ''}`}>{String(rank).padStart(2, '0')}</span></td>
                       <td>
                         <div className="public-player">
                           <span className={`public-player-avatar avatar-${index % 5}`}>{player.displayName.slice(0, 1).toUpperCase()}</span>
                           <strong>{player.displayName}</strong>
-                          {index === 0 && <span className="leader-crown">TOP PLAYER</span>}
+                          {rank === 1 && <span className="leader-crown">TOP PLAYER</span>}
                         </div>
                       </td>
                       <td><strong className="public-mmr">{player.currentMMR.toLocaleString()}</strong></td>
