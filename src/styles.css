@@ -2316,6 +2316,10 @@ button:disabled {
 }
 
 @media (max-width: 700px) {
+  .public-header {
+    backdrop-filter: none;
+  }
+
   .public-header-inner {
     width: calc(100% - 30px);
     min-height: 64px;
